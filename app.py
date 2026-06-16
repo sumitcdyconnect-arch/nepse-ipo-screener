@@ -133,6 +133,27 @@ def delete_ipo(id):
     db.session.commit()
     return redirect(url_for('admin', key=ADMIN_PASSWORD))
 
+
+@app.route('/tracker/edit/<int:id>', methods=['POST'])
+def edit_application(id):
+    app_entry = Application.query.get_or_404(id)
+    if app_entry.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    app_entry.ipo_name = request.form['ipo_name']
+    app_entry.amount = int(request.form['amount'])
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/tracker/delete/<int:id>', methods=['POST'])
+def delete_application(id):
+    app_entry = Application.query.get_or_404(id)
+    if app_entry.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    db.session.delete(app_entry)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
 with app.app_context():
     db.create_all()
 

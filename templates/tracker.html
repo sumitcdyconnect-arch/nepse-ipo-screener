@@ -25,120 +25,82 @@
 {% if applications %}
 <div style="font-weight:bold; margin-bottom:8px; color:#555; font-size:13px;">YOUR APPLICATIONS</div>
 {% for a in applications %}
-<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-    <div>
-        <div style="font-weight:bold;">{{ a.ipo_name }}</div>
-        <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
+<div class="card" id="card-{{ a.id }}">
+    <div id="view-{{ a.id }}" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div style="font-weight:bold;">{{ a.ipo_name }}</div>
+            <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-weight:bold; color:#1a1a2e;">Rs {{ a.amount }}</div>
+            <span onclick="showEdit({{ a.id }}, '{{ a.ipo_name }}', {{ a.amount }})" style="cursor:pointer; font-size:16px;">✏️</span>
+            <span onclick="deleteApp({{ a.id }})" style="cursor:pointer; font-size:16px;">🗑️</span>
+        </div>
     </div>
-    <div style="font-weight:bold; color:#1a1a2e;">Rs {{ a.amount }}</div>
+    <div id="edit-{{ a.id }}" style="display:none;">
+        <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <div style="display:flex; gap:8px;">
+            <button onclick="saveEdit({{ a.id }})"
+                style="flex:1; padding:10px; background:#2e7d32; color:white; border:none; border-radius:8px; cursor:pointer;">Save</button>
+            <button onclick="cancelEdit({{ a.id }})"
+                style="flex:1; padding:10px; background:#eee; color:#333; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
 </div>
 {% endfor %}
 {% endif %}
 
-<!-- Auth Modal -->
-<div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
-    <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:380px; margin:auto; margin-top:20%;">
-        <div style="font-weight:bold; font-size:18px; margin-bottom:4px;" id="modalTitle">Login</div>
-        <div style="font-size:13px; color:#999; margin-bottom:16px;">Track your IPO applications</div>
+{% endblock %}
 
-        <div id="registerForm" style="display:none;">
-            <input id="reg_username" placeholder="Username"
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-            <input id="reg_phone" placeholder="Phone Number"
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-            <input id="reg_password" type="password" placeholder="Password"
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-            <button onclick="submitRegister()"
-                style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
-                Create Account
-            </button>
-            <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
-                Already have an account? <span onclick="showLogin()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Login</span>
-            </div>
-        </div>
-
-        <div id="loginForm">
-            <input id="log_username" placeholder="Username"
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-            <input id="log_password" type="password" placeholder="Password"
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-            <button onclick="submitLogin()"
-                style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
-                Login
-            </button>
-            <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
-                No account? <span onclick="showRegister()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Create one</span>
-            </div>
-        </div>
-
-        <div id="authError" style="color:#c62828; font-size:13px; margin-top:8px; text-align:center;"></div>
-        <div style="text-align:center; margin-top:12px;">
-            <span onclick="closeModal()" style="font-size:13px; color:#999; cursor:pointer;">Cancel</span>
-        </div>
-    </div>
-</div>
-
+{% block scripts %}
 <script>
 const loggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
 
 function handleAdd() {
     if (!loggedIn) {
-        document.getElementById('authModal').style.display = 'flex';
+        openAuthModal();
         return;
     }
     const ipo_name = document.getElementById('ipo_name').value.trim();
     const amount = document.getElementById('amount').value.trim();
     if (!ipo_name || !amount) return;
-
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/tracker';
-    const f1 = document.createElement('input');
-    f1.name = 'ipo_name'; f1.value = ipo_name;
-    const f2 = document.createElement('input');
-    f2.name = 'amount'; f2.value = amount;
+    const f1 = document.createElement('input'); f1.name = 'ipo_name'; f1.value = ipo_name;
+    const f2 = document.createElement('input'); f2.name = 'amount'; f2.value = amount;
     form.appendChild(f1); form.appendChild(f2);
     document.body.appendChild(form);
     form.submit();
 }
 
-function closeModal() {
-    document.getElementById('authModal').style.display = 'none';
-    document.getElementById('authError').textContent = '';
+function showEdit(id, name, amount) {
+    document.getElementById('view-' + id).style.display = 'none';
+    document.getElementById('edit-' + id).style.display = 'block';
+    document.getElementById('edit_name_' + id).value = name;
+    document.getElementById('edit_amount_' + id).value = amount;
 }
 
-function showLogin() {
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('modalTitle').textContent = 'Login';
+function cancelEdit(id) {
+    document.getElementById('edit-' + id).style.display = 'none';
+    document.getElementById('view-' + id).style.display = 'flex';
 }
 
-function showRegister() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    document.getElementById('modalTitle').textContent = 'Create Account';
-}
-
-async function submitRegister() {
+async function saveEdit(id) {
+    const name = document.getElementById('edit_name_' + id).value;
+    const amount = document.getElementById('edit_amount_' + id).value;
     const form = new FormData();
-    form.append('username', document.getElementById('reg_username').value);
-    form.append('phone', document.getElementById('reg_phone').value);
-    form.append('password', document.getElementById('reg_password').value);
-    const res = await fetch('/register', { method: 'POST', body: form });
-    const data = await res.json();
-    if (data.success) location.reload();
-    else document.getElementById('authError').textContent = data.error;
+    form.append('ipo_name', name);
+    form.append('amount', amount);
+    const res = await fetch('/tracker/edit/' + id, { method: 'POST', body: form });
+    if (res.ok) location.reload();
 }
 
-async function submitLogin() {
-    const form = new FormData();
-    form.append('username', document.getElementById('log_username').value);
-    form.append('password', document.getElementById('log_password').value);
-    const res = await fetch('/login', { method: 'POST', body: form });
-    const data = await res.json();
-    if (data.success) location.reload();
-    else document.getElementById('authError').textContent = data.error;
+async function deleteApp(id) {
+    if (!confirm('Delete this application?')) return;
+    const res = await fetch('/tracker/delete/' + id, { method: 'POST' });
+    if (res.ok) document.getElementById('card-' + id).remove();
 }
 </script>
-
 {% endblock %}

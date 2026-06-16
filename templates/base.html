@@ -7,17 +7,47 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
-        .header { background: #1a1a2e; color: white; padding: 16px 20px; text-align: center; }
+        .header { background: #1a1a2e; color: white; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
         .header h1 { font-size: 20px; }
+        .profile-btn { background: none; border: 2px solid white; border-radius: 50%; width: 36px; height: 36px; color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; }
         .nav { display: flex; background: white; border-bottom: 1px solid #eee; }
         .nav a { flex: 1; text-align: center; padding: 12px; text-decoration: none; color: #555; font-size: 14px; }
         .nav a.active { color: #1a1a2e; font-weight: bold; border-bottom: 2px solid #1a1a2e; }
         .container { padding: 16px; max-width: 480px; margin: 0 auto; }
         .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+        /* Profile dropdown */
+        .profile-wrapper { position: relative; }
+        .dropdown { display: none; position: absolute; right: 0; top: 44px; background: white; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); min-width: 160px; z-index: 100; overflow: hidden; }
+        .dropdown a { display: block; padding: 12px 16px; color: #333; text-decoration: none; font-size: 14px; }
+        .dropdown a:hover { background: #f5f5f5; }
+        .dropdown .divider { border: none; border-top: 1px solid #eee; margin: 0; }
+        .profile-wrapper.open .dropdown { display: block; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>NEPSE IPO Screener</h1></div>
+    <div class="header">
+        <h1>NEPSE IPO Screener</h1>
+        <div class="profile-wrapper" id="profileWrapper">
+            <button class="profile-btn" onclick="toggleDropdown()">
+                {% if current_user.is_authenticated %}
+                    {{ current_user.username[0].upper() }}
+                {% else %}
+                    👤
+                {% endif %}
+            </button>
+            <div class="dropdown">
+                {% if current_user.is_authenticated %}
+                    <a style="font-weight:bold; color:#1a1a2e;">{{ current_user.username }}</a>
+                    <hr class="divider">
+                    <a href="/logout">Logout</a>
+                {% else %}
+                    <a onclick="openAuthModal()">Login</a>
+                    <a onclick="openAuthModal()">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
     <nav class="nav">
         <a href="/" class="{% if request.path == '/' %}active{% endif %}">IPOs</a>
         <a href="/tracker" class="{% if request.path == '/tracker' %}active{% endif %}">Tracker</a>
@@ -26,5 +56,96 @@
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+
+    <!-- Auth Modal (global so works on all pages) -->
+    <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:380px; margin:auto; margin-top:15%;">
+            <div style="font-weight:bold; font-size:18px; margin-bottom:4px;" id="modalTitle">Login</div>
+            <div style="font-size:13px; color:#999; margin-bottom:16px;">Track your IPO applications</div>
+
+            <div id="loginForm">
+                <input id="log_username" placeholder="Username"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+                <input id="log_password" type="password" placeholder="Password"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+                <button onclick="submitLogin()"
+                    style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+                    Login
+                </button>
+                <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
+                    No account? <span onclick="showRegister()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Sign Up</span>
+                </div>
+            </div>
+
+            <div id="registerForm" style="display:none;">
+                <input id="reg_username" placeholder="Username"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+                <input id="reg_phone" placeholder="Phone Number"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+                <input id="reg_password" type="password" placeholder="Password"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+                <button onclick="submitRegister()"
+                    style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+                    Create Account
+                </button>
+                <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
+                    Already have an account? <span onclick="showLogin()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Login</span>
+                </div>
+            </div>
+
+            <div id="authError" style="color:#c62828; font-size:13px; margin-top:8px; text-align:center;"></div>
+            <div style="text-align:center; margin-top:12px;">
+                <span onclick="closeModal()" style="font-size:13px; color:#999; cursor:pointer;">Cancel</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById('profileWrapper').classList.toggle('open');
+        }
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('profileWrapper');
+            if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
+        });
+        function openAuthModal() {
+            document.getElementById('profileWrapper').classList.remove('open');
+            document.getElementById('authModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('authError').textContent = '';
+        }
+        function showLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Login';
+        }
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Create Account';
+        }
+        async function submitLogin() {
+            const form = new FormData();
+            form.append('username', document.getElementById('log_username').value);
+            form.append('password', document.getElementById('log_password').value);
+            const res = await fetch('/login', { method: 'POST', body: form });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else document.getElementById('authError').textContent = data.error;
+        }
+        async function submitRegister() {
+            const form = new FormData();
+            form.append('username', document.getElementById('reg_username').value);
+            form.append('phone', document.getElementById('reg_phone').value);
+            form.append('password', document.getElementById('reg_password').value);
+            const res = await fetch('/register', { method: 'POST', body: form });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else document.getElementById('authError').textContent = data.error;
+        }
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
