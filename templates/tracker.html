@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card" style="background:#1a1a2e; color:white;">
+    <div style="font-size:13px; opacity:0.7;">Total Applied This Year</div>
+    <div style="font-size:32px; font-weight:bold; margin-top:4px;">Rs {{ total_spent }}</div>
+    <div style="font-size:13px; margin-top:8px; opacity:0.8;">
+        {% if total_spent <= 5000 %}
+            ✅ You are within a healthy budget
+        {% else %}
+            ⚠️ You are applying more than usual
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div style="font-weight:bold; margin-bottom:12px;">Log New Application</div>
+    <form method="POST">
+        <input name="ipo_name" placeholder="IPO Name" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="amount" type="number" placeholder="Amount (Rs)" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <button type="submit"
+            style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+            Add Application
+        </button>
+    </form>
+</div>
+
+{% if applications %}
+<div style="font-weight:bold; margin-bottom:8px; color:#555; font-size:13px;">YOUR APPLICATIONS</div>
+{% for a in applications %}
+<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <div style="font-weight:bold;">{{ a.ipo_name }}</div>
+        <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
+    </div>
+    <div style="font-weight:bold; color:#1a1a2e;">Rs {{ a.amount }}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

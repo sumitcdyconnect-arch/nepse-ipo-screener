@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if ipos %}
+    {% for ipo in ipos %}
+    <div class="card">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:32px;">
+                {% if ipo.is_good %}✅{% else %}❌{% endif %}
+            </div>
+            <div>
+                <div style="font-weight:bold; font-size:16px;">{{ ipo.name }}</div>
+                <div style="font-size:13px; color:#777;">{{ ipo.sector }} · {{ ipo.rating }}</div>
+                <div style="font-size:14px; margin-top:4px; color:{% if ipo.is_good %}#2e7d32{% else %}#c62828{% endif %};">
+                    {{ ipo.reason }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align:center; color:#999; padding:40px 16px;">
+        <div style="font-size:40px;">📋</div>
+        <div style="margin-top:12px;">No IPOs open right now.</div>
+        <div style="font-size:13px; margin-top:6px;">Check back when a new IPO is announced.</div>
+    </div>
+{% endif %}
+
+{% endblock %}

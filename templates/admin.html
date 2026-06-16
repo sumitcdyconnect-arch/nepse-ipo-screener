@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card">
+    <div style="font-weight:bold; margin-bottom:12px;">Add New IPO</div>
+    <form method="POST">
+        <input name="name" placeholder="IPO Name" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="sector" placeholder="Sector (e.g. Hydropower)" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="rating" placeholder="Rating (e.g. BB+)" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="reason" placeholder="One line reason" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <select name="is_good"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <option value="true">✅ Good — Recommend Apply</option>
+            <option value="false">❌ Skip — Not Recommended</option>
+        </select>
+        <button type="submit"
+            style="width:100%; padding:12px; background:#2e7d32; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+            Add IPO
+        </button>
+    </form>
+</div>
+
+{% if ipos %}
+<div style="font-weight:bold; margin-bottom:8px; color:#555; font-size:13px;">CURRENT IPOs</div>
+{% for ipo in ipos %}
+<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <div style="font-weight:bold;">{{ ipo.name }}</div>
+        <div style="font-size:12px; color:#999;">{{ ipo.sector }} · {{ ipo.rating }}</div>
+        <div style="font-size:13px; color:{% if ipo.is_good %}#2e7d32{% else %}#c62828{% endif %};">{{ ipo.reason }}</div>
+    </div>
+    <a href="/admin/delete/{{ ipo.id }}"
+        style="color:#c62828; font-size:12px; text-decoration:none; margin-left:12px;">Delete</a>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

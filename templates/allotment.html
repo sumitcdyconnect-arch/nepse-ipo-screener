@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card" style="text-align:center; padding:24px 16px;">
+    <div style="font-size:40px;">🔍</div>
+    <div style="font-weight:bold; font-size:18px; margin-top:12px;">Check Allotment</div>
+    <div style="font-size:13px; color:#999; margin-top:6px;">Enter your BOID to check if you got shares</div>
+</div>
+
+<div class="card">
+    <input id="boid" placeholder="Enter your BOID number" maxlength="16"
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+    <button onclick="checkAllotment()"
+        style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+        Check Now
+    </button>
+</div>
+
+<div id="result" style="display:none;">
+</div>
+
+<script>
+function checkAllotment() {
+    const boid = document.getElementById('boid').value.trim();
+    const result = document.getElementById('result');
+
+    if (boid.length < 10) {
+        result.style.display = 'block';
+        result.innerHTML = '<div class="card" style="text-align:center; color:#c62828;">Please enter a valid BOID number.</div>';
+        return;
+    }
+
+    result.style.display = 'block';
+    result.innerHTML = '<div class="card" style="text-align:center; color:#999;">This feature will connect to CDSC live data soon. For now check at <a href="https://cdsc.com.np" target="_blank">cdsc.com.np</a></div>';
+}
+</script>
+
+{% endblock %}
