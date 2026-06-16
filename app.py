@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -7,14 +9,27 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-import os
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'nepse-secret-123')
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///nepse.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-app.config['SECRET_KEY'] = 'nepse-secret-123'
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    phone = db.Column(db.String(15), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    applications = db.relationship('Application', backref='user', lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 class IPO(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -29,6 +44,11 @@ class Application(db.Model):
     ipo_name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def index():
@@ -38,13 +58,15 @@ def index():
 @app.route('/tracker', methods=['GET', 'POST'])
 def tracker():
     if request.method == 'POST':
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'login_required'}), 401
         ipo_name = request.form['ipo_name']
         amount = int(request.form['amount'])
-        app_entry = Application(ipo_name=ipo_name, amount=amount)
-        db.session.add(app_entry)
+        entry = Application(ipo_name=ipo_name, amount=amount, user_id=current_user.id)
+        db.session.add(entry)
         db.session.commit()
         return redirect(url_for('tracker'))
-    applications = Application.query.all()
+    applications = Application.query.filter_by(user_id=current_user.id).all() if current_user.is_authenticated else []
     total_spent = sum(a.amount for a in applications)
     return render_template('tracker.html', applications=applications, total_spent=total_spent)
 
@@ -52,6 +74,36 @@ def tracker():
 def allotment():
     return render_template('allotment.html')
 
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form['username']
+    phone = request.form['phone']
+    password = request.form['password']
+    if User.query.filter_by(username=username).first():
+        return jsonify({'error': 'Username already taken'}), 400
+    if User.query.filter_by(phone=phone).first():
+        return jsonify({'error': 'Phone already registered'}), 400
+    user = User(username=username, phone=phone)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+    login_user(user)
+    return jsonify({'success': True})
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+    user = User.query.filter_by(username=username).first()
+    if user and user.check_password(password):
+        login_user(user)
+        return jsonify({'success': True})
+    return jsonify({'error': 'Wrong username or password'}), 401
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
 

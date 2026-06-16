@@ -5,26 +5,21 @@
     <div style="font-size:13px; opacity:0.7;">Total Applied This Year</div>
     <div style="font-size:32px; font-weight:bold; margin-top:4px;">Rs {{ total_spent }}</div>
     <div style="font-size:13px; margin-top:8px; opacity:0.8;">
-        {% if total_spent <= 5000 %}
-            ✅ You are within a healthy budget
-        {% else %}
-            ⚠️ You are applying more than usual
-        {% endif %}
+        {% if total_spent <= 5000 %}✅ You are within a healthy budget
+        {% else %}⚠️ You are applying more than usual{% endif %}
     </div>
 </div>
 
 <div class="card">
     <div style="font-weight:bold; margin-bottom:12px;">Log New Application</div>
-    <form method="POST">
-        <input name="ipo_name" placeholder="IPO Name" required
-            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-        <input name="amount" type="number" placeholder="Amount (Rs)" required
-            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-        <button type="submit"
-            style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
-            Add Application
-        </button>
-    </form>
+    <input id="ipo_name" placeholder="IPO Name"
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+    <input id="amount" type="number" placeholder="Amount (Rs)"
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+    <button onclick="handleAdd()"
+        style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+        Add Application
+    </button>
 </div>
 
 {% if applications %}
@@ -39,5 +34,111 @@
 </div>
 {% endfor %}
 {% endif %}
+
+<!-- Auth Modal -->
+<div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:380px; margin:auto; margin-top:20%;">
+        <div style="font-weight:bold; font-size:18px; margin-bottom:4px;" id="modalTitle">Create Account</div>
+        <div style="font-size:13px; color:#999; margin-bottom:16px;">Track your IPO applications</div>
+
+        <div id="registerForm">
+            <input id="reg_username" placeholder="Username"
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <input id="reg_phone" placeholder="Phone Number"
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <input id="reg_password" type="password" placeholder="Password"
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <button onclick="submitRegister()"
+                style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+                Create Account
+            </button>
+            <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
+                Already have an account? <span onclick="showLogin()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Login</span>
+            </div>
+        </div>
+
+        <div id="loginForm" style="display:none;">
+            <input id="log_username" placeholder="Username"
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <input id="log_password" type="password" placeholder="Password"
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+            <button onclick="submitLogin()"
+                style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+                Login
+            </button>
+            <div style="text-align:center; margin-top:12px; font-size:13px; color:#555;">
+                No account? <span onclick="showRegister()" style="color:#1a1a2e; font-weight:bold; cursor:pointer;">Create one</span>
+            </div>
+        </div>
+
+        <div id="authError" style="color:#c62828; font-size:13px; margin-top:8px; text-align:center;"></div>
+        <div style="text-align:center; margin-top:12px;">
+            <span onclick="closeModal()" style="font-size:13px; color:#999; cursor:pointer;">Cancel</span>
+        </div>
+    </div>
+</div>
+
+<script>
+const loggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+
+function handleAdd() {
+    if (!loggedIn) {
+        document.getElementById('authModal').style.display = 'flex';
+        return;
+    }
+    const ipo_name = document.getElementById('ipo_name').value.trim();
+    const amount = document.getElementById('amount').value.trim();
+    if (!ipo_name || !amount) return;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/tracker';
+    const f1 = document.createElement('input');
+    f1.name = 'ipo_name'; f1.value = ipo_name;
+    const f2 = document.createElement('input');
+    f2.name = 'amount'; f2.value = amount;
+    form.appendChild(f1); form.appendChild(f2);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function closeModal() {
+    document.getElementById('authModal').style.display = 'none';
+    document.getElementById('authError').textContent = '';
+}
+
+function showLogin() {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('modalTitle').textContent = 'Login';
+}
+
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('modalTitle').textContent = 'Create Account';
+}
+
+async function submitRegister() {
+    const form = new FormData();
+    form.append('username', document.getElementById('reg_username').value);
+    form.append('phone', document.getElementById('reg_phone').value);
+    form.append('password', document.getElementById('reg_password').value);
+    const res = await fetch('/register', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.success) location.reload();
+    else document.getElementById('authError').textContent = data.error;
+}
+
+async function submitLogin() {
+    const form = new FormData();
+    form.append('username', document.getElementById('log_username').value);
+    form.append('password', document.getElementById('log_password').value);
+    const res = await fetch('/login', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.success) location.reload();
+    else document.getElementById('authError').textContent = data.error;
+}
+</script>
 
 {% endblock %}
