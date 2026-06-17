@@ -1,0 +1,11 @@
+[33m0acd3d8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m add AI scraper with OpenRouter
+[33m2cd96aa[m profile icon, edit and delete applications
+[33me64566e[m reset tables
+[33m1909c94[m reset tables
+[33m29d75d6[m add user auth with modal
+[33m6527a88[m add user auth with modal
+[33m2f6af93[m create tables on startup
+[33m8bf1049[m add psycopg2
+[33mb5a021e[m switch to postgres on render
+[33m0962b76[m add gunicorn
+[33mb4072fa[m NEPSE IPO Screener v1

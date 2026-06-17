@@ -38,6 +38,15 @@ class IPO(db.Model):
     rating = db.Column(db.String(10))
     is_good = db.Column(db.Boolean, default=False)
     reason = db.Column(db.String(200))
+    open_date = db.Column(db.String(50))
+    close_date = db.Column(db.String(50))
+    shares_available = db.Column(db.String(50))
+    vision = db.Column(db.Text)
+    promoters = db.Column(db.Text)
+    past_performance = db.Column(db.Text)
+    ipo_motive = db.Column(db.Text)
+    liabilities = db.Column(db.Text)
+    verdict = db.Column(db.Text)
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -155,6 +164,7 @@ def delete_application(id):
 
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 if __name__ == '__main__':
