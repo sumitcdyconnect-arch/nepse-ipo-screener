@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<div class="card">
+    <div style="font-weight:bold; margin-bottom:8px;">Paste JSON to Auto-fill</div>
+    <textarea id="json_input" placeholder='Paste JSON here...' rows="4"
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:13px; font-family:monospace;"></textarea>
+    <button type="button" onclick="fillFromJSON()"
+        style="width:100%; padding:12px; background:#1565c0; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+        Auto-fill Form
+    </button>
+</div>
 
 <div class="card">
     <div style="font-weight:bold; margin-bottom:12px;">Add New IPO</div>
@@ -57,5 +66,34 @@
 </div>
 {% endfor %}
 {% endif %}
+
+<script>
+function fillFromJSON() {
+    try {
+        const raw = document.getElementById('json_input').value.trim();
+        const data = JSON.parse(raw);
+
+        if (data.name) document.querySelector('input[name="name"]').value = data.name;
+        if (data.sector) document.querySelector('input[name="sector"]').value = data.sector;
+        if (data.rating) document.querySelector('input[name="rating"]').value = data.rating;
+        if (data.reason) document.querySelector('input[name="reason"]').value = data.reason;
+        if (data.open_date) document.querySelector('input[name="open_date"]').value = data.open_date;
+        if (data.close_date) document.querySelector('input[name="close_date"]').value = data.close_date;
+        if (data.shares_available) document.querySelector('input[name="shares_available"]').value = data.shares_available;
+        if (data.vision) document.querySelector('textarea[name="vision"]').value = data.vision;
+        if (data.promoters) document.querySelector('textarea[name="promoters"]').value = data.promoters;
+        if (data.past_performance) document.querySelector('textarea[name="past_performance"]').value = data.past_performance;
+        if (data.ipo_motive) document.querySelector('textarea[name="ipo_motive"]').value = data.ipo_motive;
+        if (data.liabilities) document.querySelector('textarea[name="liabilities"]').value = data.liabilities;
+        if (data.verdict) document.querySelector('textarea[name="verdict"]').value = data.verdict;
+        if (data.is_good !== undefined) document.querySelector('select[name="is_good"]').value = data.is_good ? 'true' : 'false';
+
+        document.getElementById('json_input').value = '';
+        alert('Form filled! Review and click Add IPO.');
+    } catch(e) {
+        alert('Invalid JSON. Please check and try again.');
+    }
+}
+</script>
 
 {% endblock %}
