@@ -125,9 +125,18 @@ def admin():
         ipo = IPO(
             name=request.form['name'],
             sector=request.form['sector'],
-            rating=request.form['rating'],
+            rating=request.form.get('rating', 'N/A'),
             reason=request.form['reason'],
-            is_good=is_good
+            is_good=is_good,
+            open_date=request.form.get('open_date'),
+            close_date=request.form.get('close_date'),
+            shares_available=request.form.get('shares_available'),
+            vision=request.form.get('vision'),
+            promoters=request.form.get('promoters'),
+            past_performance=request.form.get('past_performance'),
+            ipo_motive=request.form.get('ipo_motive'),
+            liabilities=request.form.get('liabilities'),
+            verdict=request.form.get('verdict')
         )
         db.session.add(ipo)
         db.session.commit()
@@ -161,6 +170,11 @@ def delete_application(id):
     db.session.delete(app_entry)
     db.session.commit()
     return jsonify({'success': True})
+
+@app.route('/ipo/<int:id>')
+def ipo_detail(id):
+    ipo = IPO.query.get_or_404(id)
+    return render_template('ipo_detail.html', ipo=ipo)
 
 
 with app.app_context():

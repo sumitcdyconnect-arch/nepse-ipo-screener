@@ -3,21 +3,115 @@
 
 {% if ipos %}
     {% for ipo in ipos %}
-    <div class="card">
+    <div class="card" onclick="openPanel({{ ipo.id }})" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:12px;">
             <div style="font-size:32px;">
                 {% if ipo.is_good %}✅{% else %}❌{% endif %}
             </div>
-            <div>
+            <div style="flex:1;">
                 <div style="font-weight:bold; font-size:16px;">{{ ipo.name }}</div>
                 <div style="font-size:13px; color:#777;">{{ ipo.sector }} · {{ ipo.rating }}</div>
                 <div style="font-size:14px; margin-top:4px; color:{% if ipo.is_good %}#2e7d32{% else %}#c62828{% endif %};">
                     {{ ipo.reason }}
                 </div>
+                {% if ipo.open_date and ipo.close_date %}
+                <div style="font-size:12px; color:#999; margin-top:4px;">
+                    📅 {{ ipo.open_date }} — {{ ipo.close_date }}
+                </div>
+                {% endif %}
             </div>
+            <div style="color:#ccc; font-size:18px;">›</div>
         </div>
     </div>
+
+    <!-- Slide-up Panel -->
+    <div id="panel-{{ ipo.id }}" style="display:none; position:fixed; bottom:0; left:0; width:100%; height:85%; background:white; border-radius:20px 20px 0 0; box-shadow:0 -4px 24px rgba(0,0,0,0.15); z-index:500; overflow-y:auto;">
+        <div style="padding:16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div style="width:40px; height:4px; background:#eee; border-radius:2px; margin:0 auto;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:16px;">
+                <div>
+                    <div style="font-size:22px;">{% if ipo.is_good %}✅{% else %}❌{% endif %}</div>
+                    <div style="font-weight:bold; font-size:18px; margin-top:4px;">{{ ipo.name }}</div>
+                    <div style="color:#777; font-size:13px;">{{ ipo.sector }} · {{ ipo.rating }}</div>
+                </div>
+                <a href="/ipo/{{ ipo.id }}" style="padding:8px 14px; background:#1a1a2e; color:white; border-radius:8px; text-decoration:none; font-size:13px; white-space:nowrap;">Full View</a>
+            </div>
+
+            {% if ipo.open_date %}
+            <div style="background:#f5f5f5; border-radius:10px; padding:12px; margin-bottom:12px; display:flex; gap:16px;">
+                <div style="flex:1; text-align:center;">
+                    <div style="font-size:11px; color:#999;">OPENS</div>
+                    <div style="font-weight:bold; font-size:13px;">{{ ipo.open_date }}</div>
+                </div>
+                <div style="width:1px; background:#ddd;"></div>
+                <div style="flex:1; text-align:center;">
+                    <div style="font-size:11px; color:#999;">CLOSES</div>
+                    <div style="font-weight:bold; font-size:13px;">{{ ipo.close_date }}</div>
+                </div>
+                {% if ipo.shares_available %}
+                <div style="width:1px; background:#ddd;"></div>
+                <div style="flex:1; text-align:center;">
+                    <div style="font-size:11px; color:#999;">UNITS</div>
+                    <div style="font-weight:bold; font-size:13px;">{{ ipo.shares_available }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div style="background:{% if ipo.is_good %}#e8f5e9{% else %}#ffebee{% endif %}; border-radius:10px; padding:12px; margin-bottom:12px;">
+                <div style="font-size:11px; color:#999; margin-bottom:4px;">OUR VERDICT</div>
+                <div style="font-size:14px; color:{% if ipo.is_good %}#2e7d32{% else %}#c62828{% endif %}; font-weight:bold;">{{ ipo.reason }}</div>
+                {% if ipo.verdict %}<div style="font-size:13px; color:#555; margin-top:6px;">{{ ipo.verdict }}</div>{% endif %}
+            </div>
+
+            {% if ipo.vision %}
+            <div style="margin-bottom:12px;">
+                <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">🏢 COMPANY</div>
+                <div style="font-size:14px; color:#333;">{{ ipo.vision }}</div>
+            </div>
+            {% endif %}
+
+            {% if ipo.past_performance %}
+            <div style="margin-bottom:12px;">
+                <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">📊 PAST PERFORMANCE</div>
+                <div style="font-size:14px; color:#333;">{{ ipo.past_performance }}</div>
+            </div>
+            {% endif %}
+
+            {% if ipo.ipo_motive %}
+            <div style="margin-bottom:12px;">
+                <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">💰 WHY RAISING MONEY</div>
+                <div style="font-size:14px; color:#333;">{{ ipo.ipo_motive }}</div>
+            </div>
+            {% endif %}
+
+            {% if ipo.promoters %}
+            <div style="margin-bottom:12px;">
+                <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">👥 PROMOTERS</div>
+                <div style="font-size:14px; color:#333;">{{ ipo.promoters }}</div>
+            </div>
+            {% endif %}
+
+            {% if ipo.liabilities %}
+            <div style="margin-bottom:24px;">
+                <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">⚠️ LIABILITIES</div>
+                <div style="font-size:14px; color:#333;">{{ ipo.liabilities }}</div>
+            </div>
+            {% endif %}
+
+            <button onclick="closePanel({{ ipo.id }})"
+                style="width:100%; padding:12px; background:#f5f5f5; border:none; border-radius:8px; font-size:15px; cursor:pointer; margin-bottom:16px;">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div id="backdrop-{{ ipo.id }}" onclick="closePanel({{ ipo.id }})" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:499;"></div>
     {% endfor %}
+
 {% else %}
     <div class="card" style="text-align:center; color:#999; padding:40px 16px;">
         <div style="font-size:40px;">📋</div>
@@ -26,4 +120,19 @@
     </div>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openPanel(id) {
+    document.getElementById('panel-' + id).style.display = 'block';
+    document.getElementById('backdrop-' + id).style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+function closePanel(id) {
+    document.getElementById('panel-' + id).style.display = 'none';
+    document.getElementById('backdrop-' + id).style.display = 'none';
+    document.body.style.overflow = '';
+}
+</script>
 {% endblock %}

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<a href="/admin/scrape?key={{ request.args.get('key') }}"
+    style="display:block; width:100%; padding:12px; background:#2e7d32; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer; text-align:center; margin-bottom:16px; text-decoration:none;">
+    🔍 Auto-Scrape IPOs from ShareSansar
+</a>
+
 <div class="card">
     <div style="font-weight:bold; margin-bottom:12px;">Add New IPO</div>
     <form method="POST">
@@ -8,17 +13,35 @@
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
         <input name="sector" placeholder="Sector (e.g. Hydropower)" required
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-        <input name="rating" placeholder="Rating (e.g. BB+)" required
+        <input name="rating" placeholder="Rating (e.g. BB+)"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="open_date" placeholder="Open Date (e.g. Ashad 3, 2083)"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="close_date" placeholder="Close Date (e.g. Ashad 7, 2083)"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <input name="shares_available" placeholder="Shares Available (e.g. 1,427,600 units)"
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
         <input name="reason" placeholder="One line reason" required
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <textarea name="vision" placeholder="Company vision (2-3 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
+        <textarea name="promoters" placeholder="Promoters info (2-3 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
+        <textarea name="past_performance" placeholder="Past performance (2-3 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
+        <textarea name="ipo_motive" placeholder="IPO motive (1-2 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
+        <textarea name="liabilities" placeholder="Liabilities (1-2 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
+        <textarea name="verdict" placeholder="Full verdict (2-3 sentences)" rows="2"
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;"></textarea>
         <select name="is_good"
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
             <option value="true">✅ Good — Recommend Apply</option>
             <option value="false">❌ Skip — Not Recommended</option>
         </select>
         <button type="submit"
-            style="width:100%; padding:12px; background:#2e7d32; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
+            style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
             Add IPO
         </button>
     </form>
