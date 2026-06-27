@@ -16,6 +16,13 @@
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
     <input id="amount" type="number" placeholder="Amount (Rs)"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+    <select id="status"
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        <option value="Applied">📝 Applied</option>
+        <option value="Allotted">✅ Allotted</option>
+        <option value="Not Allotted">❌ Not Allotted</option>
+        <option value="Not Allotted - Money Returned">💸 Not Allotted — Money Returned</option>
+    </select>
     <button onclick="handleAdd()"
         style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
         Add Application
@@ -26,12 +33,14 @@
 <div style="font-weight:bold; margin-bottom:8px; color:#555; font-size:13px;">YOUR APPLICATIONS</div>
 {% for a in applications %}
 <div class="card" id="card-{{ a.id }}">
+
+    <!-- VIEW MODE -->
     <div id="view-{{ a.id }}">
         <div style="display:flex; justify-content:space-between; align-items:start;">
             <div>
                 <div style="font-weight:bold;">{{ a.ipo_name }}</div>
                 <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
-                <div style="font-size:12px; font-weight:bold; margin-top:6px; padding:3px 8px; border-radius:20px; display:inline-block;
+                <div style="font-size:12px; font-weight:bold; margin-top:6px; padding:3px 10px; border-radius:20px; display:inline-block;
                     {% if a.status == 'Applied' %}background:#fff3e0; color:#e65100;
                     {% elif a.status == 'Allotted' %}background:#e8f5e9; color:#2e7d32;
                     {% elif a.status == 'Not Allotted' %}background:#ffebee; color:#c62828;
@@ -49,29 +58,19 @@
                 <span onclick="deleteApp({{ a.id }})" style="cursor:pointer; font-size:16px;">🗑️</span>
             </div>
         </div>
-
-        <div id="edit-{{ a.id }}" style="display:none;">
-            <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
-            <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
-            <select id="edit_status_{{ a.id }}"
-                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
-                <option value="Applied" {% if a.status == 'Applied' %}selected{% endif %}>📝 Applied</option>
-                <option value="Allotted" {% if a.status == 'Allotted' %}selected{% endif %}>✅ Allotted</option>
-                <option value="Not Allotted" {% if a.status == 'Not Allotted' %}selected{% endif %}>❌ Not Allotted</option>
-                <option value="Not Allotted - Money Returned" {% if a.status == 'Not Allotted - Money Returned' %}selected{% endif %}>💸 Not Allotted — Money Returned</option>
-            </select>
-            <div style="display:flex; gap:8px;">
-                <button onclick="saveEdit({{ a.id }})"
-                    style="flex:1; padding:10px; background:#2e7d32; color:white; border:none; border-radius:8px; cursor:pointer;">Save</button>
-                <button onclick="cancelEdit({{ a.id }})"
-                    style="flex:1; padding:10px; background:#eee; color:#333; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
-            </div>
-        </div>
     </div>
 
+    <!-- EDIT MODE -->
     <div id="edit-{{ a.id }}" style="display:none;">
         <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <select id="edit_status_{{ a.id }}"
+            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+            <option value="Applied">📝 Applied</option>
+            <option value="Allotted">✅ Allotted</option>
+            <option value="Not Allotted">❌ Not Allotted</option>
+            <option value="Not Allotted - Money Returned">💸 Not Allotted — Money Returned</option>
+        </select>
         <div style="display:flex; gap:8px;">
             <button onclick="saveEdit({{ a.id }})"
                 style="flex:1; padding:10px; background:#2e7d32; color:white; border:none; border-radius:8px; cursor:pointer;">Save</button>
@@ -79,6 +78,7 @@
                 style="flex:1; padding:10px; background:#eee; color:#333; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
         </div>
     </div>
+
 </div>
 {% endfor %}
 {% endif %}
@@ -93,31 +93,30 @@ function handleAdd() {
     if (!loggedIn) { openAuthModal(); return; }
     const ipo_name = document.getElementById('ipo_name').value.trim();
     const amount = document.getElementById('amount').value.trim();
+    const status = document.getElementById('status').value;
     if (!ipo_name || !amount) return;
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/tracker';
     const f1 = document.createElement('input'); f1.name = 'ipo_name'; f1.value = ipo_name;
     const f2 = document.createElement('input'); f2.name = 'amount'; f2.value = amount;
-    form.appendChild(f1); form.appendChild(f2);
+    const f3 = document.createElement('input'); f3.name = 'status'; f3.value = status;
+    form.appendChild(f1); form.appendChild(f2); form.appendChild(f3);
     document.body.appendChild(form);
     form.submit();
 }
 
-function showEdit(id, name, amount) {
-    document.getElementById('view-' + id).style.visibility = 'hidden';
-    document.getElementById('view-' + id).style.height = '0';
-    document.getElementById('view-' + id).style.overflow = 'hidden';
+function showEdit(id, name, amount, status) {
+    document.getElementById('view-' + id).style.display = 'none';
     document.getElementById('edit-' + id).style.display = 'block';
     document.getElementById('edit_name_' + id).value = name;
     document.getElementById('edit_amount_' + id).value = amount;
+    document.getElementById('edit_status_' + id).value = status;
 }
 
 function cancelEdit(id) {
     document.getElementById('edit-' + id).style.display = 'none';
-    document.getElementById('view-' + id).style.visibility = 'visible';
-    document.getElementById('view-' + id).style.height = 'auto';
-    document.getElementById('view-' + id).style.overflow = 'visible';
+    document.getElementById('view-' + id).style.display = 'block';
 }
 
 async function saveEdit(id) {
