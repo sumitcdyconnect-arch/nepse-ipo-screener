@@ -160,6 +160,7 @@ def edit_application(id):
         return jsonify({'error': 'Unauthorized'}), 403
     app_entry.ipo_name = request.form['ipo_name']
     app_entry.amount = int(request.form['amount'])
+    app_entry.status = request.form.get('status', app_entry.status)
     db.session.commit()
     return jsonify({'success': True})
 

@@ -50,17 +50,22 @@
             </div>
         </div>
 
-        <!-- Status update buttons -->
-        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
-            {% if a.status == 'Applied' %}
-            <button onclick="updateStatus({{ a.id }}, 'Allotted')"
-                style="padding:6px 10px; background:#e8f5e9; color:#2e7d32; border:none; border-radius:6px; font-size:12px; cursor:pointer;">✅ Allotted</button>
-            <button onclick="updateStatus({{ a.id }}, 'Not Allotted')"
-                style="padding:6px 10px; background:#ffebee; color:#c62828; border:none; border-radius:6px; font-size:12px; cursor:pointer;">❌ Not Allotted</button>
-            {% elif a.status == 'Not Allotted' %}
-            <button onclick="updateStatus({{ a.id }}, 'Not Allotted - Money Returned')"
-                style="padding:6px 10px; background:#e3f2fd; color:#1565c0; border:none; border-radius:6px; font-size:12px; cursor:pointer;">💸 Money Returned</button>
-            {% endif %}
+        <div id="edit-{{ a.id }}" style="display:none;">
+            <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+            <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+            <select id="edit_status_{{ a.id }}"
+                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+                <option value="Applied" {% if a.status == 'Applied' %}selected{% endif %}>📝 Applied</option>
+                <option value="Allotted" {% if a.status == 'Allotted' %}selected{% endif %}>✅ Allotted</option>
+                <option value="Not Allotted" {% if a.status == 'Not Allotted' %}selected{% endif %}>❌ Not Allotted</option>
+                <option value="Not Allotted - Money Returned" {% if a.status == 'Not Allotted - Money Returned' %}selected{% endif %}>💸 Not Allotted — Money Returned</option>
+            </select>
+            <div style="display:flex; gap:8px;">
+                <button onclick="saveEdit({{ a.id }})"
+                    style="flex:1; padding:10px; background:#2e7d32; color:white; border:none; border-radius:8px; cursor:pointer;">Save</button>
+                <button onclick="cancelEdit({{ a.id }})"
+                    style="flex:1; padding:10px; background:#eee; color:#333; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -114,9 +119,11 @@ function cancelEdit(id) {
 async function saveEdit(id) {
     const name = document.getElementById('edit_name_' + id).value;
     const amount = document.getElementById('edit_amount_' + id).value;
+    const status = document.getElementById('edit_status_' + id).value;
     const form = new FormData();
     form.append('ipo_name', name);
     form.append('amount', amount);
+    form.append('status', status);
     const res = await fetch('/tracker/edit/' + id, { method: 'POST', body: form });
     if (res.ok) location.reload();
 }
@@ -125,13 +132,6 @@ async function deleteApp(id) {
     if (!confirm('Delete this application?')) return;
     const res = await fetch('/tracker/delete/' + id, { method: 'POST' });
     if (res.ok) document.getElementById('card-' + id).remove();
-}
-
-async function updateStatus(id, status) {
-    const form = new FormData();
-    form.append('status', status);
-    const res = await fetch('/tracker/status/' + id, { method: 'POST', body: form });
-    if (res.ok) location.reload();
 }
 </script>
 {% endblock %}
