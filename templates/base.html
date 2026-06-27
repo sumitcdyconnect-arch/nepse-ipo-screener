@@ -42,8 +42,8 @@
                     <hr class="divider">
                     <a href="/logout">Logout</a>
                 {% else %}
-                    <a onclick="openAuthModal()">Login</a>
-                    <a onclick="openAuthModal()">Sign Up</a>
+                    <a onclick="openLoginModal()">Login</a>
+                    <a onclick="openRegisterModal()">Sign Up</a>
                 {% endif %}
             </div>
         </div>
@@ -108,9 +108,18 @@
             const wrapper = document.getElementById('profileWrapper');
             if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
         });
-        function openAuthModal() {
+        function openLoginModal() {
             document.getElementById('profileWrapper').classList.remove('open');
+            showLogin();
             document.getElementById('authModal').style.display = 'flex';
+        }
+        function openRegisterModal() {
+            document.getElementById('profileWrapper').classList.remove('open');
+            showRegister();
+            document.getElementById('authModal').style.display = 'flex';
+        }
+        function openAuthModal() {
+            openLoginModal();
         }
         function closeModal() {
             document.getElementById('authModal').style.display = 'none';
@@ -145,6 +154,17 @@
             if (data.success) location.reload();
             else document.getElementById('authError').textContent = data.error;
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const modal = document.getElementById('authModal');
+                if (modal.style.display === 'flex') {
+                    const loginVisible = document.getElementById('loginForm').style.display !== 'none';
+                    if (loginVisible) submitLogin();
+                    else submitRegister();
+                }
+            }
+        });
     </script>
     {% block scripts %}{% endblock %}
 </body>
