@@ -50,10 +50,11 @@ class IPO(db.Model):
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ipo_name = db.Column(db.String(200), nullable=False)
+    ipo_name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(50), default='Applied')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -178,6 +179,7 @@ def ipo_detail(id):
 
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 if __name__ == '__main__':
