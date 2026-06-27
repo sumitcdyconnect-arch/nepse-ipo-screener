@@ -104,8 +104,10 @@ function handleAdd() {
     form.submit();
 }
 
-function showEdit(id, name, amount, status) {
-    document.getElementById('view-' + id).style.display = 'none';
+function showEdit(id, name, amount) {
+    document.getElementById('view-' + id).style.visibility = 'hidden';
+    document.getElementById('view-' + id).style.height = '0';
+    document.getElementById('view-' + id).style.overflow = 'hidden';
     document.getElementById('edit-' + id).style.display = 'block';
     document.getElementById('edit_name_' + id).value = name;
     document.getElementById('edit_amount_' + id).value = amount;
@@ -113,7 +115,9 @@ function showEdit(id, name, amount, status) {
 
 function cancelEdit(id) {
     document.getElementById('edit-' + id).style.display = 'none';
-    document.getElementById('view-' + id).style.display = 'block';
+    document.getElementById('view-' + id).style.visibility = 'visible';
+    document.getElementById('view-' + id).style.height = 'auto';
+    document.getElementById('view-' + id).style.overflow = 'visible';
 }
 
 async function saveEdit(id) {
