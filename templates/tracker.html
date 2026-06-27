@@ -26,17 +26,44 @@
 <div style="font-weight:bold; margin-bottom:8px; color:#555; font-size:13px;">YOUR APPLICATIONS</div>
 {% for a in applications %}
 <div class="card" id="card-{{ a.id }}">
-    <div id="view-{{ a.id }}" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <div style="font-weight:bold;">{{ a.ipo_name }}</div>
-            <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
+    <div id="view-{{ a.id }}">
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+            <div>
+                <div style="font-weight:bold;">{{ a.ipo_name }}</div>
+                <div style="font-size:12px; color:#999;">{{ a.date.strftime('%b %d, %Y') }}</div>
+                <div style="font-size:12px; font-weight:bold; margin-top:6px; padding:3px 8px; border-radius:20px; display:inline-block;
+                    {% if a.status == 'Applied' %}background:#fff3e0; color:#e65100;
+                    {% elif a.status == 'Allotted' %}background:#e8f5e9; color:#2e7d32;
+                    {% elif a.status == 'Not Allotted' %}background:#ffebee; color:#c62828;
+                    {% else %}background:#e3f2fd; color:#1565c0;{% endif %}">
+                    {% if a.status == 'Applied' %}📝
+                    {% elif a.status == 'Allotted' %}✅
+                    {% elif a.status == 'Not Allotted' %}❌
+                    {% else %}💸{% endif %}
+                    {{ a.status }}
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-weight:bold; color:#1a1a2e;">Rs {{ a.amount }}</div>
+                <span onclick="showEdit({{ a.id }}, '{{ a.ipo_name }}', {{ a.amount }}, '{{ a.status }}')" style="cursor:pointer; font-size:16px;">✏️</span>
+                <span onclick="deleteApp({{ a.id }})" style="cursor:pointer; font-size:16px;">🗑️</span>
+            </div>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div style="font-weight:bold; color:#1a1a2e;">Rs {{ a.amount }}</div>
-            <span onclick="showEdit({{ a.id }}, '{{ a.ipo_name }}', {{ a.amount }})" style="cursor:pointer; font-size:16px;">✏️</span>
-            <span onclick="deleteApp({{ a.id }})" style="cursor:pointer; font-size:16px;">🗑️</span>
+
+        <!-- Status update buttons -->
+        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+            {% if a.status == 'Applied' %}
+            <button onclick="updateStatus({{ a.id }}, 'Allotted')"
+                style="padding:6px 10px; background:#e8f5e9; color:#2e7d32; border:none; border-radius:6px; font-size:12px; cursor:pointer;">✅ Allotted</button>
+            <button onclick="updateStatus({{ a.id }}, 'Not Allotted')"
+                style="padding:6px 10px; background:#ffebee; color:#c62828; border:none; border-radius:6px; font-size:12px; cursor:pointer;">❌ Not Allotted</button>
+            {% elif a.status == 'Not Allotted' %}
+            <button onclick="updateStatus({{ a.id }}, 'Not Allotted - Money Returned')"
+                style="padding:6px 10px; background:#e3f2fd; color:#1565c0; border:none; border-radius:6px; font-size:12px; cursor:pointer;">💸 Money Returned</button>
+            {% endif %}
         </div>
     </div>
+
     <div id="edit-{{ a.id }}" style="display:none;">
         <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
@@ -58,10 +85,7 @@
 const loggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
 
 function handleAdd() {
-    if (!loggedIn) {
-        openAuthModal();
-        return;
-    }
+    if (!loggedIn) { openAuthModal(); return; }
     const ipo_name = document.getElementById('ipo_name').value.trim();
     const amount = document.getElementById('amount').value.trim();
     if (!ipo_name || !amount) return;
@@ -75,7 +99,7 @@ function handleAdd() {
     form.submit();
 }
 
-function showEdit(id, name, amount) {
+function showEdit(id, name, amount, status) {
     document.getElementById('view-' + id).style.display = 'none';
     document.getElementById('edit-' + id).style.display = 'block';
     document.getElementById('edit_name_' + id).value = name;
@@ -84,7 +108,7 @@ function showEdit(id, name, amount) {
 
 function cancelEdit(id) {
     document.getElementById('edit-' + id).style.display = 'none';
-    document.getElementById('view-' + id).style.display = 'flex';
+    document.getElementById('view-' + id).style.display = 'block';
 }
 
 async function saveEdit(id) {
@@ -101,6 +125,13 @@ async function deleteApp(id) {
     if (!confirm('Delete this application?')) return;
     const res = await fetch('/tracker/delete/' + id, { method: 'POST' });
     if (res.ok) document.getElementById('card-' + id).remove();
+}
+
+async function updateStatus(id, status) {
+    const form = new FormData();
+    form.append('status', status);
+    const res = await fetch('/tracker/status/' + id, { method: 'POST', body: form });
+    if (res.ok) location.reload();
 }
 </script>
 {% endblock %}

@@ -178,6 +178,16 @@ def ipo_detail(id):
     return render_template('ipo_detail.html', ipo=ipo)
 
 
+@app.route('/tracker/status/<int:id>', methods=['POST'])
+def update_status(id):
+    app_entry = Application.query.get_or_404(id)
+    if app_entry.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    app_entry.status = request.form['status']
+    db.session.commit()
+    return jsonify({'success': True})
+
+
 with app.app_context():
     db.drop_all()
     db.create_all()
