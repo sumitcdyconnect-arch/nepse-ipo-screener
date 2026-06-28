@@ -64,9 +64,9 @@
             <div style="font-size:13px; color:#999; margin-bottom:16px;">Track your IPO applications</div>
 
             <div id="loginForm">
-                <input id="log_username" placeholder="Username"
+                <input id="log_username" placeholder="Username" autocomplete="username"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-                <input id="log_password" type="password" placeholder="Password"
+                <input id="log_password" type="password" placeholder="Password" autocomplete="current-password"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
                 <button onclick="submitLogin()"
                     style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
@@ -78,11 +78,11 @@
             </div>
 
             <div id="registerForm" style="display:none;">
-                <input id="reg_username" placeholder="Username"
+                <input id="reg_username" placeholder="Username" autocomplete="username"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-                <input id="reg_phone" placeholder="Phone Number"
+                <input id="reg_phone" placeholder="Phone Number" autocomplete="tel"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-                <input id="reg_password" type="password" placeholder="Password"
+                <input id="reg_password" type="password" placeholder="Password" autocomplete="new-password"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
                 <button onclick="submitRegister()"
                     style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">

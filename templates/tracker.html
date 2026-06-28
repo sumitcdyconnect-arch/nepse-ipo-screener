@@ -12,9 +12,10 @@
 
 <div class="card">
     <div style="font-weight:bold; margin-bottom:12px;">Log New Application</div>
-    <input id="ipo_name" placeholder="IPO Name"
+    <input id="ipo_name" placeholder="IPO Name" autocomplete="off"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-    <input id="amount" type="number" placeholder="Amount (Rs)"
+    <input id="amount" type="number" placeholder="Amount (Rs)" autocomplete="off"
+        value="1000" min="1000" step="1000"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
     <select id="status"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
@@ -62,14 +63,14 @@
 
     <!-- EDIT MODE -->
     <div id="edit-{{ a.id }}" style="display:none;">
-        <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
-        <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input id="edit_name_{{ a.id }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;" value="{{ a.ipo_name }}">
+        <input id="edit_amount_{{ a.id }}" type="number" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;" value="{{ a.amount }}">
         <select id="edit_status_{{ a.id }}"
             style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-size:14px;">
-            <option value="Applied">📝 Applied</option>
-            <option value="Allotted">✅ Allotted</option>
-            <option value="Not Allotted">❌ Not Allotted</option>
-            <option value="Not Allotted - Money Returned">💸 Not Allotted — Money Returned</option>
+            <option value="Applied" {% if a.status == 'Applied' %}selected{% endif %}>📝 Applied</option>
+            <option value="Allotted" {% if a.status == 'Allotted' %}selected{% endif %}>✅ Allotted</option>
+            <option value="Not Allotted" {% if a.status == 'Not Allotted' %}selected{% endif %}>❌ Not Allotted</option>
+            <option value="Not Allotted - Money Returned" {% if a.status == 'Not Allotted - Money Returned' %}selected{% endif %}>💸 Not Allotted — Money Returned</option>
         </select>
         <div style="display:flex; gap:8px;">
             <button onclick="saveEdit({{ a.id }})"
@@ -90,7 +91,7 @@
 const loggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
 
 function handleAdd() {
-    if (!loggedIn) { openAuthModal(); return; }
+    if (!loggedIn) { openLoginModal(); return; }
     const ipo_name = document.getElementById('ipo_name').value.trim();
     const amount = document.getElementById('amount').value.trim();
     const status = document.getElementById('status').value;
