@@ -66,6 +66,12 @@
                 {% if ipo.verdict %}<div style="font-size:13px; color:#555; margin-top:6px;">{{ ipo.verdict }}</div>{% endif %}
             </div>
 
+            <!-- Track This IPO Button -->
+            <a href="/tracker?ipo={{ ipo.name }}"
+                style="display:block; width:100%; padding:12px; background:#2e7d32; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer; text-align:center; text-decoration:none; margin-bottom:12px;">
+                📝 Add to Tracker
+            </a>
+
             {% if ipo.vision %}
             <div style="margin-bottom:12px;">
                 <div style="font-size:11px; color:#999; font-weight:bold; margin-bottom:4px;">🏢 COMPANY</div>

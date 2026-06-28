@@ -14,9 +14,26 @@
     <div style="font-weight:bold; margin-bottom:12px;">Log New Application</div>
     <input id="ipo_name" placeholder="IPO Name" autocomplete="off"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
-    <input id="amount" type="number" placeholder="Amount (Rs)" autocomplete="off"
+    
+    <input id="amount" type="number" autocomplete="off"
         value="1000" min="1000" step="1000"
-        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
+        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:6px; font-size:14px;">
+    
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <button type="button" onclick="setAmount(1000)"
+            style="flex:1; padding:8px; background:#f0f0f0; border:none; border-radius:8px; font-size:13px; cursor:pointer;" id="chip-1000">
+            Rs 1,000
+        </button>
+        <button type="button" onclick="setAmount(2000)"
+            style="flex:1; padding:8px; background:#f0f0f0; border:none; border-radius:8px; font-size:13px; cursor:pointer;" id="chip-2000">
+            Rs 2,000
+        </button>
+        <button type="button" onclick="setAmount(5000)"
+            style="flex:1; padding:8px; background:#f0f0f0; border:none; border-radius:8px; font-size:13px; cursor:pointer;" id="chip-5000">
+            Rs 5,000
+        </button>
+    </div>
+    
     <select id="status"
         style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-size:14px;">
         <option value="Applied">📝 Applied</option>
@@ -24,6 +41,7 @@
         <option value="Not Allotted">❌ Not Allotted</option>
         <option value="Not Allotted - Money Returned">💸 Not Allotted — Money Returned</option>
     </select>
+    <input type="password" style="display:none;" autocomplete="new-password">
     <button onclick="handleAdd()"
         style="width:100%; padding:12px; background:#1a1a2e; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer;">
         Add Application
@@ -136,6 +154,28 @@ async function deleteApp(id) {
     if (!confirm('Delete this application?')) return;
     const res = await fetch('/tracker/delete/' + id, { method: 'POST' });
     if (res.ok) document.getElementById('card-' + id).remove();
+}
+
+function setAmount(val) {
+    document.getElementById('amount').value = val;
+    document.querySelectorAll('[id^="chip-"]').forEach(b => {
+        b.style.background = '#f0f0f0';
+        b.style.color = '#333';
+        b.style.fontWeight = 'normal';
+    });
+    document.getElementById('chip-' + val).style.background = '#1a1a2e';
+    document.getElementById('chip-' + val).style.color = 'white';
+    document.getElementById('chip-' + val).style.fontWeight = 'bold';
+}
+
+// Pre-fill IPO name from URL parameter
+window.onload = function() {
+    setAmount(1000);
+    const params = new URLSearchParams(window.location.search);
+    const ipoName = params.get('ipo');
+    if (ipoName) {
+        document.getElementById('ipo_name').value = ipoName;
+    }
 }
 </script>
 {% endblock %}
